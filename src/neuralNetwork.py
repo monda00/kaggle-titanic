@@ -91,7 +91,7 @@ start = time()
 
 # モデル作成
 model = Sequential()
-model.add(Dense(input_dim=4, units=16))
+model.add(Dense(input_dim=4, units=16, init='he_uniform'))
 model.add(Activation("relu"))
 model.add(Dense(units=2))
 model.add(Activation("softmax"))
@@ -105,7 +105,7 @@ model.compile(loss='categorical_crossentropy', optimizer=adam,
 # 予測
 if Mode == "Test":
     # 学習
-    history = model.fit(x_train, y_train_onehot, batch_size=10, epochs=200, verbose=1, validation_data=(x_test, y_test_onehot))
+    history = model.fit(x_train, y_train_onehot, batch_size=5, epochs=100, verbose=1, validation_data=(x_test, y_test_onehot))
     print('\ntime taken %s seconds' % str(time() - start))
 
     y_prediction = model.predict_classes(x_test)
@@ -122,7 +122,7 @@ if Mode == "Test":
 
 else:
     # 学習
-    model.fit(x_train, y_train_onehot, batch_size=10, epochs=200)
+    model.fit(x_train, y_train_onehot, batch_size=5, epochs=100)
     print('\ntime taken %s seconds' % str(time() - start))
     output = model.predict_classes(x_test)
 
