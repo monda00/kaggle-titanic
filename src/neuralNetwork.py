@@ -46,6 +46,7 @@ if Mode == "Test":
 
     x_test = scaler.transform(df_test[features].values)
     y_test = df_test['Survived'].values
+    y_test_onehot = pd.get_dummies(df_test['Survived']).values
 
 else:
     ####
@@ -90,25 +91,39 @@ start = time()
 
 # モデル作成
 model = Sequential()
-model.add(Dense(input_dim=4, units=8))
+model.add(Dense(input_dim=4, units=16))
 model.add(Activation("relu"))
 model.add(Dense(units=2))
 model.add(Activation("softmax"))
 
+# sgd = keras.optimizers.SGD(lr=0.01, momentum=0.5, decay=0, nesterov=False)
+adam = keras.optimizers.Adam(lr=0.01, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0, amsgrad=False)
 
-model.compile(loss='categorical_crossentropy', optimizer='sgd',
+model.compile(loss='categorical_crossentropy', optimizer=adam,
               metrics=['accuracy'])
-
-# 学習
-model.fit(x_train, y_train_onehot, epochs=500)
-
-print('\ntime taken %s seconds' % str(time() - start))
 
 # 予測
 if Mode == "Test":
+    # 学習
+    history = model.fit(x_train, y_train_onehot, batch_size=10, epochs=200, verbose=1, validation_data=(x_test, y_test_onehot))
+    print('\ntime taken %s seconds' % str(time() - start))
+
     y_prediction = model.predict_classes(x_test)
     print("\n\naccuracy", np.sum(y_prediction == y_test) / float(len(y_test)))
+
+    # 学習結果の描画
+    plt.plot(history.history['acc'])
+    plt.plot(history.history['val_acc'])
+    plt.title('model accuracy')
+    plt.ylabel('accuracy')
+    plt.xlabel('epoch')
+    plt.legend(['train', 'test'], loc='upper left')
+    plt.show()
+
 else:
+    # 学習
+    model.fit(x_train, y_train_onehot, batch_size=10, epochs=200)
+    print('\ntime taken %s seconds' % str(time() - start))
     output = model.predict_classes(x_test)
 
 # ----------------------
