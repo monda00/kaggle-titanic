@@ -90,8 +90,11 @@ start = time()
 
 # モデル作成
 model = Sequential()
-model.add(Dense(input_dim=4, units=2))
+model.add(Dense(input_dim=4, units=8))
+model.add(Activation("relu"))
+model.add(Dense(units=2))
 model.add(Activation("softmax"))
+
 
 model.compile(loss='categorical_crossentropy', optimizer='sgd',
               metrics=['accuracy'])
