@@ -13,18 +13,18 @@ from time import time
 # ----------------------
 
 # Test: パラメータ調整、Train: 学習
-# Mode = "Test"
-Mode = "Train"
+Mode = "Test"
+# Mode = "Train"
 
 # 学習する特徴量
-features = ['Pclass', 'Sex', 'Age', 'FamilySize']
+features = ['Pclass', 'Sex', 'Age', 'FamilySize', 'Fare']
 scaler = StandardScaler()
 
 if Mode == "Test":
     ####
     # 学習データ分割あり
     ####
-    df = pd.read_csv("../data/train.csv").replace({"male": 0, "female": 1})
+    df = pd.read_csv("../data/train.csv").replace({"male": 0, "female": 1, "S": 0, "C": 1, "Q": 2})
 
     # 学習データ
     df_train = df.iloc[:712, :]
@@ -54,7 +54,7 @@ else:
     ####
 
     # 学習データ
-    df_train = pd.read_csv("../data/train.csv").replace({"male": 0, "female": 1})
+    df_train = pd.read_csv("../data/train.csv").replace({"male": 0, "female": 1, "S": 0, "C": 1, "Q": 2})
 
     df_train["Age"].fillna(df_train.Age.median(), inplace=True)
     df_train["FamilySize"] = df_train["SibSp"] + df_train["Parch"] + 1
@@ -91,7 +91,7 @@ start = time()
 
 # モデル作成
 model = Sequential()
-model.add(Dense(input_dim=4, units=16, init='he_uniform'))
+model.add(Dense(input_dim=5, units=16, init='he_uniform'))
 model.add(Activation("relu"))
 model.add(Dense(units=2))
 model.add(Activation("softmax"))
@@ -105,7 +105,7 @@ model.compile(loss='categorical_crossentropy', optimizer=adam,
 # 予測
 if Mode == "Test":
     # 学習
-    history = model.fit(x_train, y_train_onehot, batch_size=5, epochs=100, verbose=1, validation_data=(x_test, y_test_onehot))
+    history = model.fit(x_train, y_train_onehot, batch_size=50, epochs=100, verbose=1, validation_data=(x_test, y_test_onehot))
     print('\ntime taken %s seconds' % str(time() - start))
 
     y_prediction = model.predict_classes(x_test)
@@ -122,7 +122,7 @@ if Mode == "Test":
 
 else:
     # 学習
-    model.fit(x_train, y_train_onehot, batch_size=5, epochs=100)
+    model.fit(x_train, y_train_onehot, batch_size=50, epochs=100)
     print('\ntime taken %s seconds' % str(time() - start))
     output = model.predict_classes(x_test)
 
