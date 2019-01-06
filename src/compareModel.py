@@ -34,27 +34,27 @@ combine = [train_df, test_df]
 ####
 # 特徴量の確認
 ####
-print(train_df.columns.values)
-print(train_df.head())
+# print(train_df.columns.values)
+# print(train_df.head())
 
 ####
 # データの情報確認
 ####
-print(train_df.info())
-print('_'*40)
-print(test_df.info())
-print('_'*40)
-print(train_df.describe())
+# print(train_df.info())
+# print('_'*40)
+# print(test_df.info())
+# print('_'*40)
+# print(train_df.describe())
 
 ####
 # 特徴量の解析
 ####
-print("チケットクラスが生存に関係するか")
-print(train_df[['Pclass', 'Survived']].groupby(['Pclass'], as_index=False).mean().sort_values(by='Survived', ascending=False))
-print("性別が生存に関係するか")
-print(train_df[["Sex", "Survived"]].groupby(['Sex'], as_index=False).mean().sort_values(by='Survived', ascending=False))
-print("チケットクラスと性別を合わせると？")
-print(train_df[['Pclass', 'Sex', 'Survived']].groupby(['Pclass', 'Sex'], as_index=False).mean().sort_values(by='Survived', ascending=False))
+# print("チケットクラスが生存に関係するか")
+# print(train_df[['Pclass', 'Survived']].groupby(['Pclass'], as_index=False).mean().sort_values(by='Survived', ascending=False))
+# print("性別が生存に関係するか")
+# print(train_df[["Sex", "Survived"]].groupby(['Sex'], as_index=False).mean().sort_values(by='Survived', ascending=False))
+# print("チケットクラスと性別を合わせると？")
+# print(train_df[['Pclass', 'Sex', 'Survived']].groupby(['Pclass', 'Sex'], as_index=False).mean().sort_values(by='Survived', ascending=False))
 
 # sns.set()
 # 年齢（数値特徴量の相関）
@@ -95,8 +95,8 @@ for dataset in combine:
     dataset['Title'] = dataset['Title'].replace('Ms', 'Miss')
     dataset['Title'] = dataset['Title'].replace('Mme', 'Mrs')
 
-print("肩書が生存に関わるか")
-print(train_df[['Title', 'Survived']].groupby(['Title'], as_index=False).mean())
+# print("肩書が生存に関わるか")
+# print(train_df[['Title', 'Survived']].groupby(['Title'], as_index=False).mean())
 
 title_mapping = {"Mr": 1, "Miss": 2, "Mrs": 3, "Master": 4, "Rare": 5}
 for dataset in combine:
@@ -138,7 +138,7 @@ for dataset in combine:
     dataset['Age'] = dataset['Age'].astype(int)
 
 train_df['AgeBand'] = pd.cut(train_df['Age'], 5)
-print(train_df[['AgeBand', 'Survived']].groupby(['AgeBand'], as_index=False).mean().sort_values(by='AgeBand', ascending=True))
+# print(train_df[['AgeBand', 'Survived']].groupby(['AgeBand'], as_index=False).mean().sort_values(by='AgeBand', ascending=True))
 
 for dataset in combine:
     dataset.loc[ dataset['Age'] <= 16, 'Age'] = 0
@@ -154,5 +154,55 @@ combine = [train_df, test_df]
 for dataset in combine:
     dataset['FamilySize'] = dataset['SibSp'] + dataset['Parch'] + 1
 
-print("家族データは生存に関係するか")
-print(train_df[['FamilySize', 'Survived']].groupby(['FamilySize'], as_index=False).mean().sort_values(by='Survived', ascending=False))
+# print("家族データは生存に関係するか")
+# print(train_df[['FamilySize', 'Survived']].groupby(['FamilySize'], as_index=False).mean().sort_values(by='Survived', ascending=False))
+
+# 一人かどうかのデータを作成
+for dataset in combine:
+    dataset['IsAlone'] = 0
+    dataset.loc[dataset['FamilySize'] == 1, 'IsAlone'] = 1
+
+# print("一人できたかどうかは生存に関係するか")
+# print(train_df[['IsAlone', 'Survived']].groupby(['IsAlone'], as_index=False).mean())
+
+train_df = train_df.drop(['Parch', 'SibSp', 'FamilySize'], axis=1)
+test_df = test_df.drop(['Parch', 'SibSp', 'FamilySize'], axis=1)
+combine = [train_df, test_df]
+
+# PclassとAgeを組み合わせた特徴量を作成
+for dataset in combine:
+    dataset['Age*Class'] = dataset.Age * dataset.Pclass
+
+# Embarked特徴量の欠損値を最も一般的な値で埋める
+freq_port = train_df.Embarked.dropna().mode()[0]
+for dataset in combine:
+    dataset['Embarked'] = dataset['Embarked'].fillna(freq_port)
+
+# print("出向港が生存に関係するか")
+# print(train_df[['Embarked', 'Survived']].groupby(['Embarked'], as_index=False).mean().sort_values(by='Survived', ascending=False))
+
+# Embarked特徴量を数値に変換
+for dataset in combine:
+    dataset['Embarked'] = dataset['Embarked'].map( {'S': 0, 'C': 1, 'Q': 2} ).astype(int)
+
+# Fare特徴量からFareBand特徴量を作成
+test_df['Fare'].fillna(test_df['Fare'].dropna().median(), inplace=True)
+
+train_df['FareBand'] = pd.qcut(train_df['Fare'], 4)
+# print(train_df[['FareBand', 'Survived']].groupby(['FareBand'], as_index=False).mean().sort_values(by='FareBand', ascending=True))
+
+for dataset in combine:
+    dataset.loc[ dataset['Fare'] <= 7.91, 'Fare'] = 0
+    dataset.loc[(dataset['Fare'] > 7.91) & (dataset['Fare'] <= 14.454), 'Fare'] = 1
+    dataset.loc[(dataset['Fare'] > 14.454) & (dataset['Fare'] <= 31), 'Fare']   = 2
+    dataset.loc[ dataset['Fare'] > 31, 'Fare'] = 3
+    dataset['Fare'] = dataset['Fare'].astype(int)
+
+train_df = train_df.drop(['FareBand'], axis=1)
+combine = [train_df, test_df]
+
+print(train_df.head())
+
+'''
+学習
+'''
