@@ -31,24 +31,24 @@ combine = [train_df, test_df]
 まずは、データ分析から
 '''
 
-####
+# ---------------------------
 # 特徴量の確認
-####
+# ---------------------------
 # print(train_df.columns.values)
 # print(train_df.head())
 
-####
+# ---------------------------
 # データの情報確認
-####
+# ---------------------------
 # print(train_df.info())
 # print('_'*40)
 # print(test_df.info())
 # print('_'*40)
 # print(train_df.describe())
 
-####
+# ---------------------------
 # 特徴量の解析
-####
+# ---------------------------
 # print("チケットクラスが生存に関係するか")
 # print(train_df[['Pclass', 'Survived']].groupby(['Pclass'], as_index=False).mean().sort_values(by='Survived', ascending=False))
 # print("性別が生存に関係するか")
@@ -74,9 +74,9 @@ combine = [train_df, test_df]
 # grid.add_legend()
 # plt.show()
 
-####
+# ---------------------------
 # データの調整
-####
+# ---------------------------
 
 # TicketとCabinの特徴量を削除
 train_df = train_df.drop(['Ticket', 'Cabin'], axis=1)
@@ -201,8 +201,39 @@ for dataset in combine:
 train_df = train_df.drop(['FareBand'], axis=1)
 combine = [train_df, test_df]
 
-print(train_df.head())
-
 '''
 学習
 '''
+
+# ---------------------------
+# データを読み込む
+# ---------------------------
+X_train = train_df.drop("Survived", axis=1)
+Y_train = train_df["Survived"]
+X_test = test_df.drop("PassengerId", axis=1).copy()
+
+# ---------------------------
+# Logistic Regression
+# ---------------------------
+logreg = LogisticRegression()
+logreg.fit(X_train, Y_train)
+Y_pred = logreg.predict(X_test)
+acc_log = round(logreg.score(X_train, Y_train) * 100, 2)
+print('Logistic Regression : {}'.format(acc_log))
+
+# 特徴量の有用性を検証
+coeff_df = pd.DataFrame(train_df.columns.delete(0))
+coeff_df.columns = ['Feature']
+coeff_df["Correlation"] = pd.Series(logreg.coef_[0])
+
+print(coeff_df.sort_values(by='Correlation', ascending=False))
+
+# ---------------------------
+# Support Vector Machines
+# ---------------------------
+svc = SVC()
+svc.fit(X_train, Y_train)
+Y_pred = svc.predict(X_test)
+acc_log = round(svc.score(X_train, Y_train) * 100, 2)
+print('Support Vector Machines : {}'.format(acc_log))
+
