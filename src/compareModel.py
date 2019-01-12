@@ -237,3 +237,21 @@ Y_pred = svc.predict(X_test)
 acc_log = round(svc.score(X_train, Y_train) * 100, 2)
 print('Support Vector Machines : {}'.format(acc_log))
 
+# ---------------------------
+# k-Nearest Neighbors
+# ---------------------------
+knn = KNeighborsClassifier(n_neighbors=3)
+knn.fit(X_train, Y_train)
+Y_pred = knn.predict(X_test)
+acc_knn = round(knn.score(X_train, Y_train) * 100, 2)
+print('k-Nearest Neighbors : {}'.format(acc_knn))
+
+# ---------------------------
+# Naive Bayes classifier
+# ---------------------------
+gaussian = GaussianNB()
+gaussian.fit(X_train, Y_train)
+Y_pred = gaussian.predict(X_test)
+acc_gaussian = round(gaussian.score(X_train, Y_train) * 100, 2)
+print('Naive Bayes classifier : {}'.format(acc_gaussian))
+
