@@ -255,3 +255,38 @@ Y_pred = gaussian.predict(X_test)
 acc_gaussian = round(gaussian.score(X_train, Y_train) * 100, 2)
 print('Naive Bayes classifier : {}'.format(acc_gaussian))
 
+# ---------------------------
+# Perceptron
+# ---------------------------
+perceptron = Perceptron()
+perceptron.fit(X_train, Y_train)
+Y_pred = perceptron.predict(X_test)
+acc_perceptron = round(perceptron.score(X_train, Y_train) * 100, 2)
+print('Perceptron : {}'.format(acc_perceptron))
+
+# ---------------------------
+# Decision Tree
+# ---------------------------
+decision_tree = DecisionTreeClassifier()
+decision_tree.fit(X_train, Y_train)
+Y_pred = decision_tree.predict(X_test)
+acc_decision_tree = round(decision_tree.score(X_train, Y_train) * 100, 2)
+print('Decision Tree : {}'.format(acc_decision_tree))
+
+# ---------------------------
+# Random Forest
+# ---------------------------
+random_forest = RandomForestClassifier(n_estimators=100)
+random_forest.fit(X_train, Y_train)
+Y_pred = random_forest.predict(X_test)
+acc_random_forest = round(random_forest.score(X_train, Y_train) * 100, 2)
+print('Random Forest : {}'.format(acc_random_forest))
+
+'''
+kaggleに登録するファイルの作成
+'''
+submission = pd.DataFrame({
+        "PassengerId": test_df["PassengerId"],
+        "Survived": Y_pred
+    })
+submission.to_csv('../data/submission.csv', index=False)
