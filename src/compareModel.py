@@ -20,6 +20,7 @@ from sklearn.naive_bayes import GaussianNB # ナイーブベイズのガウス�
 from sklearn.linear_model import Perceptron # パーセプトロン
 from sklearn.linear_model import SGDClassifier # 確率的勾配降下法でクラス分類
 from sklearn.tree import DecisionTreeClassifier # 決定木
+from sklearn.neural_network import MLPClassifier # ニューラルネットワーク
 
 
 # csvからデータの取り込み
@@ -281,6 +282,15 @@ random_forest.fit(X_train, Y_train)
 Y_pred = random_forest.predict(X_test)
 acc_random_forest = round(random_forest.score(X_train, Y_train) * 100, 2)
 print('Random Forest : {}'.format(acc_random_forest))
+
+# ---------------------------
+# Neural Network
+# ---------------------------
+neural_network = MLPClassifier(solver="sgd", random_state=0, max_iter=10000)
+neural_network.fit(X_train, Y_train)
+Y_pred = neural_network.predict(X_test)
+acc_neural_network = round(neural_network.score(X_train, Y_train) * 100, 2)
+print('Neural Network : {}'.format(acc_neural_network))
 
 '''
 kaggleに登録するファイルの作成
