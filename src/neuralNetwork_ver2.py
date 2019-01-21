@@ -132,13 +132,14 @@ for dataset in combine:
 train_df = train_df.drop(['FareBand'], axis=1)
 combine = [train_df, test_df]
 
-print(train_df.head())
+# print(test_df["PassengerId"])
+# exit()
 
 # ここからパラメータ調整モードと学習モードに分ける------------------------------------------------------
 
 # Test:パラメータ調整、Train:学習
-Mode = "Test"
-# Mode = "Train"
+# Mode = "Test"
+Mode = "Train"
 
 scaler = StandardScaler()
 features = ['Pclass', 'Sex', 'Age', 'Fare', 'Embarked', 'Title', 'IsAlone', 'Age*Class']
@@ -156,6 +157,16 @@ if Mode == "Test":
     x_test = scaler.fit_transform(df_test[features].values)
     y_test = df_train["Survived"].values
     y_test_onehot = pd.get_dummies(df_test["Survived"]).values
+else:
+    df_train = train_df
+    df_test = test_df
+
+    x_train = scaler.fit_transform(df_train[features].values)
+    y_train = df_train["Survived"].values
+    y_train_onehot = pd.get_dummies(df_train['Survived']).values
+
+    x_test = scaler.fit_transform(df_test[features].values)
+
 
 # ---------------------------
 # 学習
@@ -165,7 +176,13 @@ start = time()
 
 # モデル作成
 model = Sequential()
-model.add(Dense(input_dim=8, units=32, init='he_uniform'))
+model.add(Dense(input_dim=8, units=16, init='he_uniform'))
+model.add(Activation("relu"))
+model.add(Dense(units=32))
+model.add(Activation("relu"))
+model.add(Dense(units=16))
+model.add(Activation("relu"))
+model.add(Dense(units=8))
 model.add(Activation("relu"))
 model.add(Dense(units=2))
 model.add(Activation("softmax"))
@@ -177,7 +194,7 @@ model.compile(loss='categorical_crossentropy', optimizer=adam,\
 
 if Mode == "Test":
     # 学習
-    history = model.fit(x_train, y_train_onehot, batch_size=50, epochs=100,\
+    history = model.fit(x_train, y_train_onehot, batch_size=10, epochs=200,\
                         verbose=1, validation_data=(x_test, y_test_onehot))
     print('\ntime taken %s seconds' % str(time() - start))
 
@@ -193,8 +210,20 @@ if Mode == "Test":
     plt.xlabel('epoch')
     plt.legend(['train', 'test'], loc='upper left')
     plt.show()
+else:
+    model.fit(x_train, y_train_onehot, batch_size=10, epochs=120)
+    print('\ntime taken %s seconds' % str(time() - start))
+    output = model.predict_classes(x_test)
 
 
 # ---------------------------
 # 評価
 # ---------------------------
+
+if Mode == "Train":
+    with open("../data/predict_result_data.csv", "w") as f:
+        writer = csv.writer(f, lineterminator='\n')
+        writer.writerow(["PassengerId", "Survived"])
+        for pid, survived in zip(test_df["PassengerId"].astype(int), output.astype(int)):
+            writer.writerow([pid, survived])
+
