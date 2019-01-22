@@ -19,6 +19,7 @@ import keras.optimizers
 from keras.models import Sequential
 from keras.layers.core import Dense, Activation
 from sklearn.preprocessing import StandardScaler
+from keras.layers.normalization import BatchNormalization
 
 # ---------------------------
 # 前処理
@@ -179,15 +180,19 @@ model = Sequential()
 model.add(Dense(input_dim=8, units=16, init='he_uniform'))
 model.add(Activation("relu"))
 model.add(Dense(units=32))
+model.add(BatchNormalization())
 model.add(Activation("relu"))
 model.add(Dense(units=16))
+model.add(BatchNormalization())
 model.add(Activation("relu"))
 model.add(Dense(units=8))
+model.add(BatchNormalization())
 model.add(Activation("relu"))
 model.add(Dense(units=2))
+model.add(BatchNormalization())
 model.add(Activation("softmax"))
 
-adam = keras.optimizers.Adam(lr=0.01, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0, amsgrad=False)
+adam = keras.optimizers.Adam(lr=0.01, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0001, amsgrad=False)
 
 model.compile(loss='categorical_crossentropy', optimizer=adam,\
               metrics=['accuracy'])
@@ -211,7 +216,7 @@ if Mode == "Test":
     plt.legend(['train', 'test'], loc='upper left')
     plt.show()
 else:
-    model.fit(x_train, y_train_onehot, batch_size=10, epochs=120)
+    model.fit(x_train, y_train_onehot, batch_size=10, epochs=200)
     print('\ntime taken %s seconds' % str(time() - start))
     output = model.predict_classes(x_test)
 
@@ -226,4 +231,3 @@ if Mode == "Train":
         writer.writerow(["PassengerId", "Survived"])
         for pid, survived in zip(test_df["PassengerId"].astype(int), output.astype(int)):
             writer.writerow([pid, survived])
-
