@@ -21,6 +21,9 @@ from keras.layers.core import Dense, Activation
 from sklearn.preprocessing import StandardScaler
 from keras.layers.normalization import BatchNormalization
 
+# other script
+from compareHyperParam import *
+
 # ---------------------------
 # 前処理
 # ---------------------------
@@ -139,8 +142,8 @@ combine = [train_df, test_df]
 # ここからパラメータ調整モードと学習モードに分ける------------------------------------------------------
 
 # Test:パラメータ調整、Train:学習
-# Mode = "Test"
-Mode = "Train"
+Mode = "Test"
+# Mode = "Train"
 
 scaler = StandardScaler()
 features = ['Pclass', 'Sex', 'Age', 'Fare', 'Embarked', 'Title', 'IsAlone', 'Age*Class']
@@ -153,10 +156,10 @@ if Mode == "Test":
     y_train = df_train["Survived"].values
     y_train_onehot = pd.get_dummies(df_train["Survived"]).values
 
-    # 確認データ
+    # 検証データ
     df_test = df.iloc[712:, :]
     x_test = scaler.fit_transform(df_test[features].values)
-    y_test = df_train["Survived"].values
+    y_test = df_test["Survived"].values
     y_test_onehot = pd.get_dummies(df_test["Survived"]).values
 else:
     df_train = train_df
@@ -189,17 +192,19 @@ model.add(Dense(units=8))
 model.add(BatchNormalization())
 model.add(Activation("relu"))
 model.add(Dense(units=2))
-model.add(BatchNormalization())
 model.add(Activation("softmax"))
 
-adam = keras.optimizers.Adam(lr=0.01, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0001, amsgrad=False)
+# 試しに実験
+compare_weight_decay(model, x_train, y_train_onehot, x_test, y_test, y_test_onehot)
+
+adam = keras.optimizers.Adam(lr=0.01, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
 
 model.compile(loss='categorical_crossentropy', optimizer=adam,\
               metrics=['accuracy'])
 
 if Mode == "Test":
     # 学習
-    history = model.fit(x_train, y_train_onehot, batch_size=10, epochs=200,\
+    history = model.fit(x_train, y_train_onehot, batch_size=10, epochs=120,\
                         verbose=1, validation_data=(x_test, y_test_onehot))
     print('\ntime taken %s seconds' % str(time() - start))
 
@@ -216,7 +221,7 @@ if Mode == "Test":
     plt.legend(['train', 'test'], loc='upper left')
     plt.show()
 else:
-    model.fit(x_train, y_train_onehot, batch_size=10, epochs=200)
+    model.fit(x_train, y_train_onehot, batch_size=10, epochs=120)
     print('\ntime taken %s seconds' % str(time() - start))
     output = model.predict_classes(x_test)
 
@@ -231,3 +236,5 @@ if Mode == "Train":
         writer.writerow(["PassengerId", "Survived"])
         for pid, survived in zip(test_df["PassengerId"].astype(int), output.astype(int)):
             writer.writerow([pid, survived])
+
+
