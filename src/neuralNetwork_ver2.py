@@ -178,6 +178,11 @@ else:
 
 start = time()
 
+# レイヤーの数の比較
+# compare_layer(x_train, y_train_onehot, x_test, y_test, y_test_onehot)
+# ユニットの数の比較
+# compare_units(x_train, y_train_onehot, x_test, y_test, y_test_onehot)
+
 # モデル作成
 model = Sequential()
 model.add(Dense(input_dim=8, units=16, init='he_uniform'))
@@ -194,8 +199,10 @@ model.add(Activation("relu"))
 model.add(Dense(units=2))
 model.add(Activation("softmax"))
 
-# 試しに実験
-compare_weight_decay(model, x_train, y_train_onehot, x_test, y_test, y_test_onehot)
+# weight decayの比較
+# compare_weight_decay(model, x_train, y_train_onehot, x_test, y_test, y_test_onehot)
+# 最適化関数の比較
+compare_optimizer(model, x_train, y_train_onehot, x_test, y_test, y_test_onehot)
 
 adam = keras.optimizers.Adam(lr=0.01, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
 
